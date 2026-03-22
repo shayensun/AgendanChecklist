@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agendan Checklist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar card">
+        <div>
+          <p class="eyebrow">Agenda / Tracker / Log</p>
+          <h1>Agendan Checklist</h1>
+          <p class="muted">
+            把未来安排、习惯坚持与生活记录，放进同一个可爱的个人日程系统里。
+          </p>
+        </div>
+
+        <nav class="nav-tabs" aria-label="主导航">
+          <button class="nav-tab active" data-view="dashboard">今日</button>
+          <button class="nav-tab" data-view="calendar">日历</button>
+          <button class="nav-tab" data-view="trackers">打卡管理</button>
+        </nav>
+
+        <section class="sidebar-highlight">
+          <div class="highlight-badge">Quick Add</div>
+          <p>快速新增 Event / Habit / Log，只需 2~3 步完成。</p>
+          <button class="primary-button" id="quickAddButton">＋ 新增内容</button>
+        </section>
+
+        <section class="sidebar-summary" id="sidebarSummary"></section>
+      </aside>
+
+      <main class="main-layout">
+        <header class="topbar card">
+          <div>
+            <p class="eyebrow">Today Focus</p>
+            <h2 id="todayHeading"></h2>
+            <p class="muted" id="todaySubheading"></p>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-button" id="jumpTodayButton">回到今天</button>
+            <button class="primary-button" id="headerAddButton">新增</button>
+          </div>
+        </header>
+
+        <section class="view active" id="dashboardView">
+          <div class="dashboard-grid">
+            <section class="card section-card">
+              <div class="section-header">
+                <div>
+                  <p class="eyebrow">Today's Agenda</p>
+                  <h3>今日行程</h3>
+                </div>
+                <button class="text-button" data-open-modal="event">新增行程</button>
+              </div>
+              <div id="todayEvents" class="list-stack empty-state-host"></div>
+            </section>
+
+            <section class="card section-card">
+              <div class="section-header">
+                <div>
+                  <p class="eyebrow">Habit Tracker</p>
+                  <h3>今日打卡</h3>
+                </div>
+                <button class="text-button" data-open-modal="tracker">新增打卡项</button>
+              </div>
+              <div id="todayTrackers" class="list-stack empty-state-host"></div>
+            </section>
+
+            <section class="card section-card daily-log-card">
+              <div class="section-header">
+                <div>
+                  <p class="eyebrow">Life Notes</p>
+                  <h3>今日记录</h3>
+                </div>
+                <button class="text-button" data-open-modal="log">写点什么</button>
+              </div>
+              <div id="todayLogs" class="list-stack empty-state-host"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="calendarView">
+          <div class="card section-card calendar-card">
+            <div class="calendar-toolbar">
+              <div>
+                <p class="eyebrow">Calendar View</p>
+                <h3 id="calendarHeading"></h3>
+              </div>
+              <div class="calendar-actions">
+                <button class="ghost-button" id="prevMonthButton">← 上个月</button>
+                <button class="ghost-button" id="nextMonthButton">下个月 →</button>
+              </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+          </div>
+
+          <div class="card section-card day-detail-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">Selected Day</p>
+                <h3 id="selectedDateHeading"></h3>
+              </div>
+              <button class="text-button" id="addForSelectedDate">为这一天新增</button>
+            </div>
+            <div class="day-detail-columns">
+              <div>
+                <h4>行程</h4>
+                <div id="selectedDayEvents" class="list-stack empty-state-host"></div>
+              </div>
+              <div>
+                <h4>打卡记录</h4>
+                <div id="selectedDayHabits" class="list-stack empty-state-host"></div>
+              </div>
+              <div>
+                <h4>日常记录</h4>
+                <div id="selectedDayLogs" class="list-stack empty-state-host"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="trackersView">
+          <div class="card section-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">Habit Management</p>
+                <h3>所有打卡项目</h3>
+              </div>
+              <button class="primary-button" data-open-modal="tracker">新增打卡项</button>
+            </div>
+            <div id="trackerManagementList" class="tracker-grid empty-state-host"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-overlay hidden" id="entryModalOverlay">
+      <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Create something new</p>
+            <h3 id="modalTitle">新增内容</h3>
+          </div>
+          <button class="icon-button" id="closeModalButton" aria-label="关闭">✕</button>
+        </div>
+
+        <div class="entry-type-switch" id="entryTypeSwitch">
+          <button class="switch-chip active" data-type="event">Event</button>
+          <button class="switch-chip" data-type="tracker">Habit Tracker</button>
+          <button class="switch-chip" data-type="log">Daily Log</button>
+        </div>
+
+        <form id="entryForm" class="entry-form">
+          <div id="formAlert" class="form-alert hidden"></div>
+
+          <section class="form-panel active" data-panel="event">
+            <label>
+              标题
+              <input name="eventTitle" type="text" placeholder="例如：和朋友午餐" required />
+            </label>
+            <div class="two-col">
+              <label>
+                日期
+                <input name="eventDate" type="date" required />
+              </label>
+              <label class="toggle-label">
+                <span>全天</span>
+                <input name="eventAllDay" type="checkbox" />
+              </label>
+            </div>
+            <div class="two-col time-row">
+              <label>
+                开始时间
+                <select name="eventStartTime"></select>
+              </label>
+              <label>
+                结束时间
+                <select name="eventEndTime"></select>
+              </label>
+            </div>
+            <div class="two-col">
+              <label>
+                分类
+                <select name="eventCategory">
+                  <option value="生活">生活</option>
+                  <option value="工作">工作</option>
+                  <option value="学习">学习</option>
+                  <option value="约会">约会</option>
+                  <option value="健康">健康</option>
+                </select>
+              </label>
+              <label>
+                地点
+                <input name="eventLocation" type="text" list="locationSuggestions" placeholder="粗略搜索地点" />
+              </label>
+            </div>
+            <label>
+              备注
+              <textarea name="eventNotes" rows="3" placeholder="补充细节... "></textarea>
+            </label>
+          </section>
+
+          <section class="form-panel" data-panel="tracker">
+            <label>
+              名称
+              <input name="trackerName" type="text" placeholder="例如：运动 / 喝水 / 月经记录" required />
+            </label>
+            <div class="three-col">
+              <label>
+                Emoji / 图标
+                <input name="trackerIcon" type="text" maxlength="2" placeholder="💧" />
+              </label>
+              <label>
+                频率
+                <select name="trackerFrequency">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="biweekly">Bi-Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </label>
+              <label>
+                类型
+                <select name="trackerType">
+                  <option value="normal">Normal</option>
+                  <option value="health">Health</option>
+                  <option value="period">Period</option>
+                </select>
+              </label>
+            </div>
+            <div class="three-col">
+              <label>
+                颜色
+                <input name="trackerColor" type="color" value="#ff7aa2" />
+              </label>
+              <label>
+                提醒时间
+                <select name="trackerReminderTime"></select>
+              </label>
+              <label>
+                起始日期
+                <input name="trackerStartDate" type="date" required />
+              </label>
+            </div>
+            <label>
+              备注
+              <textarea name="trackerNotes" rows="3" placeholder="记录目标、症状或提醒"></textarea>
+            </label>
+          </section>
+
+          <section class="form-panel" data-panel="log">
+            <label>
+              日期
+              <input name="logDate" type="date" required />
+            </label>
+            <div class="two-col">
+              <label>
+                Mood
+                <select name="logMood">
+                  <option value="开心">开心</option>
+                  <option value="平静">平静</option>
+                  <option value="充实">充实</option>
+                  <option value="疲惫">疲惫</option>
+                  <option value="低落">低落</option>
+                </select>
+              </label>
+              <label>
+                Tag
+                <input name="logTag" type="text" placeholder="例如：购物 / 社交 / 成就" />
+              </label>
+            </div>
+            <label>
+              内容
+              <textarea name="logText" rows="5" placeholder="今天发生了什么？" required></textarea>
+            </label>
+          </section>
+
+          <div class="modal-actions">
+            <button type="button" class="ghost-button" id="cancelModalButton">取消</button>
+            <button type="submit" class="primary-button">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <datalist id="locationSuggestions">
+      <option value="Home" />
+      <option value="Office" />
+      <option value="Gym" />
+      <option value="Coffee Shop" />
+      <option value="Library" />
+      <option value="Hospital" />
+      <option value="Park" />
+    </datalist>
+
+    <script src="app.js"></script>
+  </body>
+</html>
